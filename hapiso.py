@@ -266,9 +266,24 @@ Clustering - Mean Shift
 print "Clustering Started"
 cluster_vector = mean_shift_clustering(data1)
 print "Clustering Ended", "\n Result : ", np.size(cluster_vector), np.count_nonzero(cluster_vector), cluster_vector
-print "Base Calls", base_calls
+print "Base Calls", base_call
 
-
+"""
+Haplotype call test # TEST
+"""
+haplo_one = []
+haplo_two = []
+for i in range(len(data)):
+    if data[i][0] == 1:
+        haplo_one.append(base_call[i][0])
+        haplo_two.append(base_call[i][1])
+    elif data[i][0] == -1:
+        haplo_one.append(base_call[i][1])
+        haplo_two.append(base_call[i][0])
+    else:
+        sys.exit(28)
+print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
+print data1
 
 
 
