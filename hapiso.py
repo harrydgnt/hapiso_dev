@@ -19,6 +19,9 @@ from numpy.random import rand
 from scipy.cluster.vq import kmeans,vq
 import collections
 from clustering import mean_shift_clustering
+from collections import Counter
+
+
 
 # if len(sys.argv)<4 :
 #     print "[1]-bam"
@@ -80,8 +83,8 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
         readsA.append(pileupread.alignment.qname)
 
 readsA= np.unique(readsA)
-print readsA
-print "len(readsA)",len(readsA)
+# print readsA
+# print "len(readsA)",len(readsA)
 
 
 print "-------",chr
@@ -138,6 +141,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
     if pileupcolumn.n > 1:
         ref_base = ""
         alt_base = ""
+        alt_list = []
         for pileupread in pileupcolumn.pileups:
             #print pileupread
             #if (pileupcolumn.pos>6694285):
@@ -163,6 +167,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                 elif pileupread.alignment.seq[pileupread.query_position].lower() != chr1Ref[pileupcolumn.pos].lower():
                     dataT[n]=-1
                     alt_base = pileupread.alignment.seq[pileupread.query_position]
+                    alt_list.append(alt_base)
                 else:
                     # dataT[n]=-1
                     print "NONE"
@@ -193,21 +198,19 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
 
         #print dataT
 # """
-# Cutoff parameters - FIX IT
+# Cutoff parameters - currently 20% of the reads
 # """
 
-        if k_n1>10 and k1>10:
-        #     for i in range(len(readsA)):
-        #         if dataT[i]==0:
-        #             dataT[i]=0
-            # print pileupcolumn.pos,"    ",kN," ",k0,"  ",k1
-            #print dataT
+        if k_n1 > len(readsA)*0.20 and k1 > 0.20*len(readsA):
             data.append(dataT)
+            alt_base_tuple = Counter(alt_list).most_common(1)
+            alt_base = alt_base_tuple[0]
             print ref_base, alt_base,
             base_pair = []
             base_pair.append(ref_base)
             base_pair.append(alt_base)
             base_call.append(base_pair)
+            print pileupcolumn.pos
             #if myListPrev[n]!=pileupread.qpos & pileupcolumn.n>10:
 
             # dataT=[]
