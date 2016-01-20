@@ -288,7 +288,8 @@ for i in range(len(data)):
 print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
 print data1
 
-
+# pca_matrix_output = open('./pca_matrix_output.txt','w')
+np.savetxt('./pca_matrix_output.txt',data1)
 
  # """
  # Visual Checking Step
