@@ -174,7 +174,6 @@ def find_minimum_pair_new(matrix,size,num_trial):
 
 #    find best pair
     for j in range(num_reads):
-        print "J", j
         for k in range(j,num_reads):
             dummy_two_matrix=[]
             dummy_two_matrix.append(dummy_matrix[j])

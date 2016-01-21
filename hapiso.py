@@ -39,16 +39,29 @@ from collections import Counter
 # g2=int(sys.argv[3])
 # out=sys.argv[4]
 # chr=sys.argv[5]
-bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
-g1=45900638
-g2=45908900
+bam = '/home/harryyang/research/text/ENSG00000187608_chr1_948803_949920.bam'
+g1=948803
+g2=949920
 out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
-chr = "chr17"
+chr = "chr1"
 
 """
 NOTE: The given gene coordinates do not matter: I supplied wrong coord but it finds it self so supplying the coordinate is unneccsary?
 """
+output = False
+"""
+Result output init
+"""
+if output == True:
+    result_name = bam.split('.bam')[0] + '_result.txt'
+    result=file(result_name, 'w')
+    orig_stdout = sys.__stdout__
+    sys.stdout = result
 
+
+"""
+Mapping
+"""
 
 samfile = pysam.Samfile(bam, "rb" )
 print "mapped=",samfile.mapped
@@ -201,8 +214,9 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
 # Cutoff parameters - currently 20% of the reads
 # """
 
-        if k_n1 > len(readsA)*0.20 and k1 > 0.20*len(readsA):
+        if (k_n1 > len(readsA)*0.20 and k1 > 0.20*len(readsA)) or (k_n1 >= 0.80*(k1 + k_n1) and k_n1 > 3):
             data.append(dataT)
+            # print alt_list
             alt_base_tuple = Counter(alt_list).most_common(1)
             alt_base = alt_base_tuple[0]
             print ref_base, alt_base,
@@ -277,20 +291,38 @@ Haplotype call test # TEST
 haplo_one = []
 haplo_two = []
 for i in range(len(data)):
+    print i
     if data[i][0] == 1:
         haplo_one.append(base_call[i][0])
+        haplo_two.append(base_call[i][1])
+    elif base_call[i][0] == '':
+        """
+        if the SNP is shared by both haplotype
+        """
+        haplo_one.append(base_call[i][1])
         haplo_two.append(base_call[i][1])
     elif data[i][0] == -1:
         haplo_one.append(base_call[i][1])
         haplo_two.append(base_call[i][0])
+    # elif data[i][0] == 0:
+    #     """
+    #     if only one haplotype shows a variant - missing exon on the other haplotype
+    #     """
+    #     # haplo_one.append(base_call[i][1])
+    #     # haplo_two.append(base_call[i][1])
+    #     print "?"
+
     else:
+
+        # print data, i
         sys.exit(28)
 print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
-print data1
+# print data1
 
 # pca_matrix_output = open('./pca_matrix_output.txt','w')
-name = bam.split('.bam')[0] + '_binary_matrix.txt'
-np.savetxt(name,data1)
+binary_matrix_name = bam.split('.bam')[0] + '_binary_matrix.txt'
+np.savetxt(binary_matrix_name,data1)
+
 
  # """
  # Visual Checking Step
@@ -298,9 +330,9 @@ np.savetxt(name,data1)
 # for i in range(len(cluster_vector)):
 #     print readsA[i].rsplit('/')[1:2], cluster_vector[i]
 #
-
-
-
+if output == True:
+    sys.stdout = orig_stdout
+    result.close()
 
 
 
