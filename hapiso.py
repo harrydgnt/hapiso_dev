@@ -595,7 +595,7 @@ for i in range(0,len(MatrixC2[0,:])):
     haplo2.append(e)
 
 
-if len(haplo1)!=len(haplo2):
+if len(haplo1) != len(haplo2):
     print "ERROR!"
     print "exit"
     # sys.exit(1)
@@ -604,11 +604,11 @@ print "len(haplo1)",len(haplo1)
 print "len(haplo2)",len(haplo1)
 
 if len(MatrixC1)>len(MatrixC2):
-    ratio=float(len(MatrixC2))/len(MatrixC1)
+    ratio = float(len(MatrixC2))/len(MatrixC1)
 else:
-    ratio=len(MatrixC1)/float(len(MatrixC2))
+    ratio = len(MatrixC1)/float(len(MatrixC2))
 
-print "ratio",ratio
+print "ratio", ratio
 
 
 
