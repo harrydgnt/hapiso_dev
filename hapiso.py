@@ -23,7 +23,7 @@ from collections import Counter
 
 debug_marker = True
 
-if debug_marker == True:
+if debug_marker is True:
 
     bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
     g1=45900638
@@ -61,7 +61,7 @@ NOTE: The given gene coordinates do not matter: I supplied wrong coord but it fi
 """
 Result output init
 """
-if output == True:
+if output is True:
     result_name = bam.split('.bam')[0] + '_result.txt'
     result=file(result_name, 'w')
     orig_stdout = sys.__stdout__
@@ -73,14 +73,15 @@ Mapping
 """
 
 samfile = pysam.Samfile(bam, "rb" )
-print "mapped=",samfile.mapped
-print "UNmapped=",samfile.unmapped
+print "Number of Mapped reads", samfile.mapped
+print "Number of Unmapped reads", samfile.unmapped
 
-print g1,"----",g2
+print g1, "----", g2
 
-flag=0;
+flag = 0
 
 np.set_printoptions(threshold='nan')
+np.set_printoptions(precision=1)
 
 
 readsA = []
@@ -153,9 +154,6 @@ base_call = []
 
 marker = 0
 for pileupcolumn in samfile.pileup(chr, g1, g2):
-    # print 'coverage at base %s = %s' % (pileupcolumn.pos, pileupcolumn.n)
-    #
-    # print chr1Ref[pileupcolumn.pos].lower()
     dataT=[]
     for i in range(len(readsA)):
          dataT.append(0)
@@ -165,20 +163,9 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
         alt_base = ""
         alt_list = []
         for pileupread in pileupcolumn.pileups:
-            #print pileupread
-            #if (pileupcolumn.pos>6694285):
-            #print 'coverage at base %s = %s' % (pileupcolumn.pos , pileupcolumn.n)
 
-
-            #print pileupcolumn.pos,', '.join(array)
-            #print "pileupread.alignment.qname ",pileupread.alignment.qname
             itemindex = np.where(readsA==pileupread.alignment.qname)
-            #print "item=",itemindex[0]
             n=itemindex[0]
-            #print n
-            #print "PREVIOUS POSITION=", myListPrev[n]
-            # print "current position=", pileupread.query_position
-
             if not pileupread.is_del and not pileupread.is_refskip: # to skip splicing and deletions ; tehre is still base but it comes from previous
                 # print pileupread.query_position
                 read_list[n]=pileupread.alignment.seq[pileupread.query_position]
@@ -191,7 +178,6 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                     alt_base = pileupread.alignment.seq[pileupread.query_position]
                     alt_list.append(alt_base)
                 else:
-                    # dataT[n]=-1
                     print "NONE"
                     sys.exit(333)
                     #data[pileupcolumn.pos-g1][n]=1
@@ -199,20 +185,20 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                 dataT[n]=0
                 print "NONE "
                 continue
-            pos_list[n]=pileupread.query_position
+            pos_list[n] = pileupread.query_position
 
 
-        kN=0
-        k1=0
-        k_n1=0
+        kN = 0
+        k1 = 0
+        k_n1 = 0
         #print dataT
         for i in range(len(readsA)):
-            if dataT[i]==0:
-                kN=kN+1
-            elif dataT[i]==1:
-                k1=k1+1
-            elif dataT[i]==-1:
-                k_n1=k_n1+1
+            if dataT[i] == 0:
+                kN = kN + 1
+            elif dataT[i] == 1:
+                k1 = k1 + 1
+            elif dataT[i] == -1:
+                k_n1 = k_n1 + 1
             else:
                 exit(27)
         # print "N's=",kN
