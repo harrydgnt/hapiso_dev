@@ -39,11 +39,11 @@ from collections import Counter
 # g2=int(sys.argv[3])
 # out=sys.argv[4]
 # chr=sys.argv[5]
-bam = '/home/harryyang/research/text/ENSG00000187608_chr1_948803_949920.bam'
-g1=948803
-g2=949920
+bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
+g1=45900638
+g2=45908900
 out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
-chr = "chr1"
+chr = "chr17"
 
 """
 NOTE: The given gene coordinates do not matter: I supplied wrong coord but it finds it self so supplying the coordinate is unneccsary?
@@ -125,16 +125,16 @@ data=[]
 
 
 
-myList=[]
+read_list = []
 for i in range(len(readsA)):
-    myList.append('N')
+    read_list.append('N')
 
 Matrix=[]
 
 
-myListPrev=[]
+pos_list = []
 for i in range(len(readsA)):
-    myListPrev.append(0)
+    pos_list.append(0)
 
 base_call = []
 
@@ -172,7 +172,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
 
             if not pileupread.is_del and not pileupread.is_refskip: # to skip splicing and deletions ; tehre is still base but it comes from previous
                 # print pileupread.query_position
-                myList[n]=pileupread.alignment.seq[pileupread.query_position]
+                read_list[n]=pileupread.alignment.seq[pileupread.query_position]
                 if pileupread.alignment.seq[pileupread.query_position].lower() == chr1Ref[pileupcolumn.pos].lower():
                     dataT[n]=1
                     ref_base = pileupread.alignment.seq[pileupread.query_position]
@@ -186,10 +186,11 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                     print "NONE"
                     sys.exit(333)
                     #data[pileupcolumn.pos-g1][n]=1
-            elif pileupread.query_position == 'None':
+            elif pileupread.query_position is None:
                 dataT[n]=0
                 print "NONE "
-            myListPrev[n]=pileupread.query_position
+                continue
+            pos_list[n]=pileupread.query_position
 
 
         kN=0
@@ -231,16 +232,14 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
             # for i in range(len(readsA)):
             #     dataT.append(-1)
 
-        # Matrix.append(myList)
+        Matrix.append(read_list)
             #print myList
             #if myList.count('A')+myList.count('C')+myList.count('T')+myList.count('G')>10 :
                 #print "@COV",pileupcolumn.pos+1,myList.count('A'),myList.count('C'),myList.count('T'),myList.count('G'),myList.count('N')
-            myList=[]
-            for i in range(len(readsA)):
-                myList.append('N')
-            # FIX IT
-            # marker = marker +1
-            # print marker
+        read_list=[]
+        for i in range(len(readsA)):
+            read_list.append('N')
+
 
 """
 Variable Documentation
@@ -270,7 +269,7 @@ data1=array(data).transpose()
 
 print np.shape(data1)
 # for i in range(len(data)):
-#     print np.count_nonzero(data[i])
+#     print np.count_nonzero(data[i])=
 
 
 
@@ -282,7 +281,9 @@ Clustering - Mean Shift
 """
 print "Clustering Started"
 cluster_vector = mean_shift_clustering(data1)
-print "Clustering Ended", "\n Result : ", np.size(cluster_vector), np.count_nonzero(cluster_vector), cluster_vector
+# print "Clustering Ended", "\n Result : ", np.size(cluster_vector), np.count_nonzero(cluster_vector), cluster_vector
+print "Clustering Finished"
+print "ASE: ", np.size(cluster_vector) - np.count_nonzero(cluster_vector), ":", np.count_nonzero(cluster_vector)
 print "Base Calls", base_call
 
 """
@@ -338,7 +339,7 @@ if output == True:
 
 
 
-sys.exit(23)
+# sys.exit(23)
 
 
 
@@ -354,6 +355,10 @@ a1=[]
 a2=[]
 
 
+"""
+ERROR CORRECTION
+"""
+print pos_list
 for pileupcolumn in samfile.pileup(chr, g1, g2):
     #print 'coverage at base %s = %s' % (pileupcolumn.pos , pileupcolumn.n)
     #print chr1Ref[pileupcolumn.pos].lower()
@@ -368,23 +373,26 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
 
             #print pileupcolumn.pos,', '.join(array)
             #print "pileupread.alignment.qname ",pileupread.alignment.qname
-            itemindex = np.where(readsA==pileupread.alignment.qname)
+            itemindex = np.where(readsA == pileupread.alignment.qname)
             #print "item=",itemindex[0]
-            n=itemindex[0]
+            n = itemindex[0]
             #print n
             #print "PREVIOUS POSITION=", myListPrev[n]
             #print "current position=", pileupread.qpos
-
-            if myListPrev[n]!=pileupread.query_position: # to skip splicing and deletions ; tehre is still base but it comes from previous
-
+            # print n
+            if pos_list[n] != pileupread.query_position: # to skip splicing and deletions ; tehre is still base but it comes from previous
+                if n is None:
+                    print "XXXXXX"
+                if pileupread.query_position is None:
+                    continue
                 #print idx[n]
-                if pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n]==-1 :
+                if pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n] == -1:
                     a1.append(pileupread.alignment.seq[pileupread.query_position].lower())
-                elif pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n]==1 :
+                elif pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n] == 1:
                     a2.append(pileupread.alignment.seq[pileupread.query_position].lower())
-                myList=[]
+                read_list = []
                 for i in range(len(readsA)):
-                    myList.append('N')
+                    read_list.append('N')
 
                 a1_a=a1.count('a')
                 a1_c=a1.count('c')
@@ -404,7 +412,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                 a2C_count=0
 
 
-def printme( a1_a,a1_c,a1_t,a1_g):
+def printme(a1_a, a1_c, a1_t, a1_g):
     "This prints a passed string into this function"
     print str
     return a1C
@@ -476,7 +484,7 @@ for i in range(0,len(Matrix[0])):
     for j in range(0, len(Matrix)):
         ar.append(Matrix[j][i])
 
-    if cluster_vector[i]==-1:
+    if cluster_vector[i] == 1:
         MatrixC1.append(ar)
     else:
         MatrixC2.append(ar)
@@ -517,19 +525,19 @@ a[:] = (value for value in a if value != 'N')
 
 import collections
 counter=collections.Counter(a)
-print(counter)
+print(counter),"COUNTER"
 # Counter({1: 4, 2: 4, 3: 2, 5: 2, 4: 1})
-print(counter.values())
+print(counter.values()),"COUNTER_VAL"
 # [4, 4, 2, 1, 2]
-print(counter.keys())
+print(counter.keys()),"COUNTER<KEYS"
 # [1, 2, 3, 4, 5]
-print(counter.most_common(1))
+print(counter.most_common(1)),"COUNTER>MOSTCOMMON"
 # [(1, 4), (2, 4), (3, 2)]
 
 
 e='N'
 for letter, count in counter.most_common(1):
-    print '%s: %7d' % (letter, count)
+    # print '%s: %7d' % (letter, count)
     e=letter
 
 print "e=",e
@@ -546,7 +554,7 @@ for i in range(0,len(MatrixC1[0,:])):
     e='N'
     for letter, count in counter.most_common(1):
         e=letter
-    print i,letter
+    # print i,letter
     haplo1.append(e)
 
 print "haplo1"
@@ -570,7 +578,7 @@ print(counter.most_common(1))
 
 e='N'
 for letter, count in counter.most_common(1):
-    print '%s: %7d' % (letter, count)
+    # print '%s: %7d' % (letter, count)
     e=letter
 
 print "e=",e
@@ -622,8 +630,7 @@ for i in range(0, len(haplo1)):
 print "MatrixC1 ", len(MatrixC1)
 print "MatrixC2 ", len(MatrixC2)
 
-print "NEW begin",g1
-print "NEW end ",g2
+
 print "ENSEMBL begin",g1E
 print "ENSEMBL end ",g2E
 print "ALLELE1", len(MatrixC1)
@@ -638,24 +645,24 @@ haplo2E=[]
 #write haplotype staking into consideration coverage
 for i in range(0, len(haplo1)):
     if i+g1+1>=g1E and i+g1+1<=g2E:
-        print i+g1+1,g1E,g2E
-        print MatrixC1[:,i].tolist().count(haplo1[i]), MatrixC2[:,i].tolist().count(haplo2[i])
-        print haplo1[i]
-        print haplo2[i]
+        # print i+g1+1,g1E,g2E
+        # print MatrixC1[:,i].tolist().count(haplo1[i]), MatrixC2[:,i].tolist().count(haplo2[i])
+        # print haplo1[i]
+        # print haplo2[i]
         if  MatrixC1[:,i].tolist().count(haplo1[i])==1 and MatrixC2[:,i].tolist().count(haplo2[i])==1 :
-            print "both N"
+            # print "both N"
             haplo1E.append('N')
             haplo2E.append('N')
         elif MatrixC1[:,i].tolist().count(haplo1[i])==1:
-            print "case1"
+            # print "case1"
             haplo1E.append(haplo2[i])
             haplo2E.append(haplo2[i])
         elif MatrixC2[:,i].tolist().count(haplo2[i])==1:
-            print "case2"
+            # print "case2"
             haplo2E.append(haplo1[i])
             haplo1E.append(haplo1[i])
         else:
-            print "Both good"
+            # print "Both good"
             haplo1E.append(haplo1[i])
             haplo2E.append(haplo2[i])
         if len(haplo1E)!=len(haplo2E):
@@ -680,3 +687,19 @@ print "len(H2)",len(haplo2E)
 
 
 print "done!"
+
+
+def comparison(haplo_one, haplo_two):
+    for i in range(len(haplo_one)):
+        if haplo_one[i] != haplo_two[i] and haplo_one[i] != 'N' and haplo_two[i] != 'N':
+            print "SNV"
+            print "Haplo 1:", haplo_one[i]
+            print "Haplo 2:", haplo_two[i]
+            print i
+        elif haplo_one[i] != haplo_two[i] and (haplo_one[i] == "N" or haplo_two[i] == 'N'):
+            # print "INDEL"
+            # print "Haplo 1:", haplo_one[i]
+            # print "Haplo 2:", haplo_two[i]
+            # print "POS:", i
+            continue
+comparison(''.join(haplo1E), ''.join(haplo2E))
