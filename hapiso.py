@@ -21,34 +21,43 @@ import collections
 from clustering import mean_shift_clustering
 from collections import Counter
 
+debug_marker = True
+
+if debug_marker == True:
+
+    bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
+    g1=45900638
+    g2=45908900
+    out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
+    chr = "chr17"
+    output = False
+else:
+    if len(sys.argv)<4 :
+        print "HapIso - Haplotype-specific Isoform reconstrunction"
+        print "Written by Harry Yang and Serghei Mangul"
+        print "[1] - The bam file to run HapIso"
+        print "[2] - Left boundary of the Gene"
+        print "[3] - Right boundary of the Gene"
+        print "[4] - Output file"
+        print "[5] - Chromosome"
+        print "[6] - Reference Genome"
+        print "If any question: email harry2416@gmail.com"
+        sys.exit(1)
+    bam = sys.argv[1]
+    g1 = int(sys.argv[2])
+    g2 = int(sys.argv[3])
+    out = sys.argv[4]
+    chr = sys.argv[5]
+    output = True
 
 
-# if len(sys.argv)<4 :
-#     print "[1]-bam"
-#     print "[2]-left boundary"
-#     print "[3]-right boundary"
-#     print "[4] -out file"
-#     print "[5] - chr"
-#     sys.exit(1)
-#
-#
-#
-#
-# bam=sys.argv[1]
-# g1=int(sys.argv[2])
-# g2=int(sys.argv[3])
-# out=sys.argv[4]
-# chr=sys.argv[5]
-bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
-g1=45900638
-g2=45908900
-out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
-chr = "chr17"
+
+
 
 """
 NOTE: The given gene coordinates do not matter: I supplied wrong coord but it finds it self so supplying the coordinate is unneccsary?
 """
-output = False
+
 """
 Result output init
 """
