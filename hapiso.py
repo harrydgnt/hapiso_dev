@@ -21,7 +21,7 @@ import collections
 from clustering import mean_shift_clustering
 from collections import Counter
 
-debug_marker = True
+debug_marker = False
 
 if debug_marker is True:
 
@@ -32,7 +32,7 @@ if debug_marker is True:
     chr = "chr17"
     output = False
 else:
-    if len(sys.argv)<4 :
+    if len(sys.argv)<6 :
         print "HapIso - Haplotype-specific Isoform reconstrunction"
         print "Written by Harry Yang and Serghei Mangul"
         print "[1] - The bam file to run HapIso"
@@ -48,6 +48,7 @@ else:
     g2 = int(sys.argv[3])
     out = sys.argv[4]
     chr = sys.argv[5]
+    genome = sys.argv[6]
     output = True
 
 
@@ -62,6 +63,7 @@ NOTE: The given gene coordinates do not matter: I supplied wrong coord but it fi
 Result output init
 """
 if output is True:
+    bam = sys.argv[1]
     result_name = bam.split('.bam')[0] + '_result.txt'
     result=file(result_name, 'w')
     orig_stdout = sys.__stdout__
@@ -113,7 +115,7 @@ readsA= np.unique(readsA)
 print "-------",chr
 
 
-inFile = open('/home/harryyang/research/genome.fa','r')
+inFile = open(genome,'r')
 for record in SeqIO.parse(inFile,'fasta'):
     print record.id
     if record.id == chr:
@@ -183,7 +185,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                     #data[pileupcolumn.pos-g1][n]=1
             elif pileupread.query_position is None:
                 dataT[n]=0
-                print "NONE "
+               # print "NONE "
                 continue
             pos_list[n] = pileupread.query_position
 
@@ -311,7 +313,8 @@ for i in range(len(data)):
     else:
 
         # print data, i
-        sys.exit(28)
+        # sys.exit(28)
+	continue
 print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
 # print data1
 
