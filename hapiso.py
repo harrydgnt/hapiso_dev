@@ -29,10 +29,11 @@ if debug_marker is True:
     g1=35265595
     g2=35289548
     out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
+    genome = '/home/harryyang/research/genome.fa'
     chr = "chr6"
     output = False
 else:
-    if len(sys.argv)<4 :
+    if len(sys.argv) < 6 :
         print "HapIso - Haplotype-specific Isoform reconstrunction"
         print "Written by Harry Yang and Serghei Mangul"
         print "[1] - The bam file to run HapIso"
@@ -48,6 +49,7 @@ else:
     g2 = int(sys.argv[3])
     out = sys.argv[4]
     chr = sys.argv[5]
+    genome = sys.argv[6]
     output = True
 
 
@@ -113,7 +115,7 @@ readsA= np.unique(readsA)
 print "-------",chr
 
 
-inFile = open('/home/harryyang/research/genome.fa','r')
+inFile = open(genome,'r')
 for record in SeqIO.parse(inFile,'fasta'):
     print record.id
     if record.id == chr:
@@ -348,7 +350,8 @@ for i in range(len(temp_data_hap_call)):
         # print data, i
         print "EXIT 28"
         sys.exit(28)
-        continue
+
+
 print data1_pre_filter[read_for_haplo_index]
 print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
 # print data1
