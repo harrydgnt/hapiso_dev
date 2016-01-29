@@ -25,11 +25,11 @@ debug_marker = True
 
 if debug_marker is True:
 
-    bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
-    g1=45900638
-    g2=45908900
+    bam = '/home/harryyang/research/new_test/ENSG00000023892_6_35265595_35289548.bam'
+    g1=35265595
+    g2=35289548
     out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
-    chr = "chr17"
+    chr = "chr6"
     output = False
 else:
     if len(sys.argv)<4 :
@@ -183,7 +183,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                     #data[pileupcolumn.pos-g1][n]=1
             elif pileupread.query_position is None:
                 dataT[n]=0
-                print "NONE "
+                # print "NONE "
                 continue
             pos_list[n] = pileupread.query_position
 
@@ -267,6 +267,42 @@ print np.shape(data1)
 #     print np.count_nonzero(data[i])=
 
 
+"""
+binary matrix checker
+- finds the read with all non-zero entries
+- If all the SNP positions are zero, it should be excluded from the clustering
+"""
+
+
+def binary_matrix_checker(matrix):
+    """
+    input - data - # col = # SNP positinos, # row = # reads
+    """
+    # print np.shape(matrix)
+    # print matrix
+    num_snp = len(matrix[0])
+    num_read = len(matrix)
+    new_matrix = []
+    non_informative_matrix = []
+    perfect_read_index = 0
+    # print matrix
+    for i in range(len(matrix)):
+        # for j in range(len(matrix[0])):
+        if np.count_nonzero(matrix[i]) != 0:
+            new_matrix.append(matrix[i])
+            if np.count_nonzero(matrix[i]) == num_snp:
+                perfect_read_index = i
+        else:
+            non_informative_matrix.append(matrix[i])
+    return new_matrix, non_informative_matrix, perfect_read_index
+
+
+data1_pre_filter = data1
+data1, data1_noinfo, read_for_haplo_index = binary_matrix_checker(data1)
+# sys.exit(25)
+
+
+
 
 
 # sys.exit(22)
@@ -281,14 +317,20 @@ print "Clustering Finished"
 print "ASE: ", np.size(cluster_vector) - np.count_nonzero(cluster_vector), ":", np.count_nonzero(cluster_vector)
 print "Base Calls", base_call
 
+
+
+
 """
 Haplotype call test # TEST
 """
 haplo_one = []
 haplo_two = []
-for i in range(len(data)):
-    print i
-    if data[i][0] == 1:
+# print len(data)
+temp_data_hap_call=np.transpose(data1_pre_filter)
+print base_call
+# print np.shape(temp_data_hap_call)
+for i in range(len(temp_data_hap_call)):
+    if temp_data_hap_call[i][read_for_haplo_index] == 1:
         haplo_one.append(base_call[i][0])
         haplo_two.append(base_call[i][1])
     elif base_call[i][0] == '':
@@ -297,38 +339,36 @@ for i in range(len(data)):
         """
         haplo_one.append(base_call[i][1])
         haplo_two.append(base_call[i][1])
-    elif data[i][0] == -1:
+    elif temp_data_hap_call[i][read_for_haplo_index] == -1:
         haplo_one.append(base_call[i][1])
         haplo_two.append(base_call[i][0])
-    # elif data[i][0] == 0:
-    #     """
-    #     if only one haplotype shows a variant - missing exon on the other haplotype
-    #     """
-    #     # haplo_one.append(base_call[i][1])
-    #     # haplo_two.append(base_call[i][1])
-    #     print "?"
 
     else:
-
+        print temp_data_hap_call
         # print data, i
+        print "EXIT 28"
         sys.exit(28)
+        continue
+print data1_pre_filter[read_for_haplo_index]
 print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
 # print data1
-
+# sys.exit(33)
 # pca_matrix_output = open('./pca_matrix_output.txt','w')
 binary_matrix_name = bam.split('.bam')[0] + '_binary_matrix.txt'
 np.savetxt(binary_matrix_name,data1)
 
+"""
+Cluster Vector Recovery Step
+"""
 
- # """
- # Visual Checking Step
- # """
+for i in range()
+# """
+#  Visual Checking Step
+# """
 # for i in range(len(cluster_vector)):
 #     print readsA[i].rsplit('/')[1:2], cluster_vector[i]
 #
-if output == True:
-    sys.stdout = orig_stdout
-    result.close()
+
 
 
 
@@ -341,7 +381,7 @@ if output == True:
 
 
 print cluster_vector
-print "len(cluster)",len(cluster_vector)
+print "len(cluster_vector)", len(cluster_vector)
 
 
 
@@ -375,16 +415,19 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
             #print "PREVIOUS POSITION=", myListPrev[n]
             #print "current position=", pileupread.qpos
             # print n
-            if pos_list[n] != pileupread.query_position: # to skip splicing and deletions ; tehre is still base but it comes from previous
+            if pos_list[n] != pileupread.query_position:
+                # to skip splicing and deletions ; there is still base but it comes from previous
                 if n is None:
                     print "XXXXXX"
                 if pileupread.query_position is None:
                     continue
                 #print idx[n]
-                if pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n] == -1:
+                if pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n] == 0:
                     a1.append(pileupread.alignment.seq[pileupread.query_position].lower())
                 elif pileupread.alignment.seq[pileupread.query_position].lower() != 'n' and cluster_vector[n] == 1:
                     a2.append(pileupread.alignment.seq[pileupread.query_position].lower())
+                elif cluster_vector[n] == -10:
+                    continue
                 read_list = []
                 for i in range(len(readsA)):
                     read_list.append('N')
@@ -697,4 +740,11 @@ def comparison(haplo_one, haplo_two):
             # print "Haplo 2:", haplo_two[i]
             # print "POS:", i
             continue
+
+
 comparison(''.join(haplo1E), ''.join(haplo2E))
+
+
+if output is True:
+    sys.stdout = orig_stdout
+    result.close()
