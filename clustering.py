@@ -35,6 +35,8 @@ def similarity(matrix):
         elif matrix[0][i] != matrix[1][i]:
             non_zero_counter=non_zero_counter+1
 #    return sim_score*1.0/(zero_score*1.0/len(matrix[0]))*non_zero_counter, zero_score*1.0/len(matrix[0])
+    if non_zero_counter == 0:
+        non_zero_counter = 0
     return (sim_score*1.0/non_zero_counter)*(non_zero_counter), zero_score
 
 

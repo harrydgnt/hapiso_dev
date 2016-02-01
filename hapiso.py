@@ -364,8 +364,8 @@ np.savetxt(binary_matrix_name,data1)
 """
 Cluster Vector Recovery Step
 """
-
-for i in range()
+#
+# for i in range()
 # """
 #  Visual Checking Step
 # """
@@ -378,7 +378,7 @@ for i in range()
 
 
 
-# sys.exit(23)
+sys.exit(23)
 
 
 
