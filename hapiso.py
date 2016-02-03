@@ -326,7 +326,11 @@ print "Clustering Finished"
 print "ASE: ", np.size(cluster_vector) - np.count_nonzero(cluster_vector), ":", np.count_nonzero(cluster_vector)
 print "Base Calls", base_call
 
-
+ASE = []
+ASE.append(np.size(cluster_vector) - np.count_nonzero(cluster_vector))
+ASE.append(np.count_nonzero(cluster_vector))
+ase_name= bam.split('.bam')[0] + '_ASE.txt'
+np.savetxt(ase_name, ASE)
 
 
 """
@@ -788,7 +792,8 @@ for i in range(len(readsA)):
     dummy_line = readsA[i] + "  " + corrected_reads[i]
     corrected_list.append(dummy_line)
 
-
+cor_name = bam.split('.bam')[0] + '_corrected_reads.txt'
+np.savetxt(cor_name, corrected_list)
 
 
 
