@@ -21,6 +21,7 @@ from scipy.cluster.vq import kmeans,vq
 import collections
 from clustering import mean_shift_clustering
 from collections import Counter
+import scipy.stats as stat
 
 debug_marker = True
 
@@ -284,24 +285,32 @@ def binary_matrix_checker(matrix):
     num_read = len(matrix)
     new_matrix = []
     non_informative_matrix = []
-    perfect_read_index = 0
+    perfect_read_index = -1
+    perfect_read_index_list = []
     # print matrix
     for i in range(len(matrix)):
         # for j in range(len(matrix[0])):
         if np.count_nonzero(matrix[i]) != 0:
             new_matrix.append(matrix[i])
             if np.count_nonzero(matrix[i]) == num_snp:
-                perfect_read_index = i
+                if i == -1:
+                    perfect_read_index = i
+                # perfect_read_index_list.append(perfect_read_index)
         else:
             non_informative_matrix.append(matrix[i])
+    # most_freq = Counter(new_matrix.).most_common(1)
+    # most_freq = stat.mode(new_matrix)
+    # print most_freq
     return new_matrix, non_informative_matrix, perfect_read_index
+
 
 
 data1_pre_filter = data1
 data1, data1_noinfo, read_for_haplo_index = binary_matrix_checker(data1)
+
 # sys.exit(25)
 
-
+data1 = data1_pre_filter
 
 
 
@@ -357,7 +366,7 @@ print "Haplotype_one is:", haplo_one, "Haplotype_two is", haplo_two
 # sys.exit(33)
 # pca_matrix_output = open('./pca_matrix_output.txt','w')
 binary_matrix_name = bam.split('.bam')[0] + '_binary_matrix.txt'
-np.savetxt(binary_matrix_name,data1)
+np.savetxt(binary_matrix_name, data1)
 
 """
 Cluster Vector Recovery Step
@@ -774,8 +783,10 @@ def error_correction(haplo_one, haplo_two, cluster_vector, binary_matrix):
 
 
 corrected_reads = error_correction(''.join(haplo1E), ''.join(haplo2E), cluster_vector, binary_matrix)
+corrected_list = []
 for i in range(len(readsA)):
-    print readsA[i], corrected_reads[i]
+    dummy_line = readsA[i] + "  " + corrected_reads[i]
+    corrected_list.append(dummy_line)
 
 
 
