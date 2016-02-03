@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # -*- coding: utf-8 -*-
 """
 Created on Mon Jan 04 18:45:18 2016
@@ -26,12 +26,12 @@ debug_marker = True
 
 if debug_marker is True:
 
-    bam = '/home/harryyang/research/new_test/ENSG00000023892_6_35265595_35289548.bam'
+    bam = '/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam'
     g1=35265595
     g2=35289548
     out='/home/harryyang/research/GM12878_MRPL10_chr17_45900638-45908900.bam_out'
     genome = '/home/harryyang/research/genome.fa'
-    chr = "chr6"
+    chr = "chr17"
     output = False
 else:
     if len(sys.argv) < 6 :
@@ -76,6 +76,7 @@ Mapping
 """
 
 samfile = pysam.Samfile(bam, "rb" )
+print bam
 print "Number of Mapped reads", samfile.mapped
 print "Number of Unmapped reads", samfile.unmapped
 
@@ -145,6 +146,7 @@ for i in range(len(readsA)):
 Matrix=[]
 
 
+
 pos_list = []
 for i in range(len(readsA)):
     pos_list.append(0)
@@ -154,13 +156,12 @@ base_call = []
 # dataT=[]
 # for i in range(len(readsA)):
 #      dataT.append(0)
-
+binary_matrix = []
 marker = 0
 for pileupcolumn in samfile.pileup(chr, g1, g2):
     dataT=[]
     for i in range(len(readsA)):
-         dataT.append(0)
-
+        dataT.append(0)
     if pileupcolumn.n > 1:
         ref_base = ""
         alt_base = ""
@@ -189,7 +190,6 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
                 # print "NONE "
                 continue
             pos_list[n] = pileupread.query_position
-
 
         kN = 0
         k1 = 0
@@ -229,7 +229,7 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
             # dataT=[]
             # for i in range(len(readsA)):
             #     dataT.append(-1)
-
+        binary_matrix.append(dataT)
         Matrix.append(read_list)
             #print myList
             #if myList.count('A')+myList.count('C')+myList.count('T')+myList.count('G')>10 :
@@ -237,6 +237,8 @@ for pileupcolumn in samfile.pileup(chr, g1, g2):
         read_list=[]
         for i in range(len(readsA)):
             read_list.append('N')
+
+binary_matrix=array(binary_matrix).transpose()
 
 
 """
@@ -251,11 +253,6 @@ row2 = alt_base
 #samfile.close()
 
 data1=array(data).transpose()
-
-# print data[0]
-# print "l=",len(data)
-
-# print "l=",len(data[0])
 
 
 
@@ -347,10 +344,11 @@ for i in range(len(temp_data_hap_call)):
         haplo_two.append(base_call[i][0])
 
     else:
-        print temp_data_hap_call
+        # print temp_data_hap_call
         # print data, i
-        print "EXIT 28"
-        sys.exit(28)
+        # print "EXIT 28"
+        # sys.exit(28)
+        continue
 
 
 print data1_pre_filter[read_for_haplo_index]
@@ -378,7 +376,7 @@ Cluster Vector Recovery Step
 
 
 
-sys.exit(23)
+# sys.exit(23)
 
 
 
@@ -747,6 +745,46 @@ def comparison(haplo_one, haplo_two):
 
 
 comparison(''.join(haplo1E), ''.join(haplo2E))
+
+"""
+error correction
+"""
+def error_correction(haplo_one, haplo_two, cluster_vector, binary_matrix):
+    if len(cluster_vector) != len(binary_matrix):
+        sys.exit(34)
+    corrected_reads = []
+    for i in range(len(cluster_vector)):
+        current_hap = []
+        if cluster_vector[i] == 0:
+            current_hap = haplo_one
+        elif cluster_vector[i] == 1:
+            current_hap = haplo_two
+        corrected_read = ""
+
+        for j in range(len(binary_matrix[i])):
+            if binary_matrix[i][j] == 0:
+                continue
+            else:
+                if current_hap[j] != 'N':
+                    corrected_read = corrected_read + current_hap[j]
+                else:
+                    continue
+        corrected_reads.append(corrected_read)
+    return corrected_reads
+
+
+corrected_reads = error_correction(''.join(haplo1E), ''.join(haplo2E), cluster_vector, binary_matrix)
+for i in range(len(readsA)):
+    print readsA[i], corrected_reads[i]
+
+
+
+
+
+
+
+
+
 
 
 if output is True:
