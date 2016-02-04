@@ -37,6 +37,6 @@ out = sys.argv[4]
 
 
 alignment = pair.align.globalxx(hercules, lsc)
-print name, alignment[1][2]
+print "RESULT   ", name, alignment[1][2]
 
 
